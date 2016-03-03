@@ -30,7 +30,6 @@ if (Get-Module xMySql)
 }
 
 Import-Module (Join-Path $here -ChildPath "..\DSCResources\MSFT_xMySqlUser\MSFT_xMySqlUser.psm1")
-Import-Module (Join-Path $here -ChildPath "..\xMySql.psd1")
 
 $DSCResourceName = "MSFT_xMySqlUser"
 InModuleScope $DSCResourceName {

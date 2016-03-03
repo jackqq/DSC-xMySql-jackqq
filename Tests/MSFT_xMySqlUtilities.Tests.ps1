@@ -15,7 +15,7 @@ if (Get-Module MSFT_xMySqlUtilities -All)
     Get-Module MSFT_xMySqlUtilities -All | Remove-Module
 }
 $breakvar = $true
-Import-Module (Join-Path $here -ChildPath "..\xMySql.psd1")
+Import-Module (Join-Path $here -ChildPath "..\MSFT_xMySqlUtilities.psm1")
 
 $DSCResourceName = "MSFT_xMySqlUtilities"
 InModuleScope $DSCResourceName {
