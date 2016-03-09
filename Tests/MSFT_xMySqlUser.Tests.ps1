@@ -49,7 +49,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return "Yes" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $result = Get-TargetResource -UserName $userName -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Get-TargetResource -UserName $userName -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -65,7 +65,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return "Yes" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $result = Get-TargetResource -UserName $userName -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Get-TargetResource -UserName $userName -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should not call all the mocks' {
                 Assert-VerifiableMocks
@@ -82,7 +82,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return "Yes" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $result = Get-TargetResource -UserName $userName -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Get-TargetResource -UserName $userName -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -104,7 +104,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return "No" }
             Mock Read-ErrorFile -Verifiable { return }
             
-            $result = Get-TargetResource -UserName $userName -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Get-TargetResource -UserName $userName -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -127,7 +127,7 @@ InModuleScope $DSCResourceName {
 
             Mock Get-TargetResource -Verifiable { return $userExists }
             
-            $result = Test-TargetResource -UserName "TestUser" -Ensure "Present" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Test-TargetResource -UserName "TestUser" -Ensure "Present" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -145,7 +145,7 @@ InModuleScope $DSCResourceName {
 
             Mock Get-TargetResource -Verifiable { return $userNotExist }
             
-            $result = Test-TargetResource -UserName "TestUser" -Ensure "Present" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Test-TargetResource -UserName "TestUser" -Ensure "Present" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -165,7 +165,7 @@ InModuleScope $DSCResourceName {
 
             Mock Get-TargetResource -Verifiable { return $userExists }
             
-            $result = Test-TargetResource -UserName "TestUser" -Ensure "Absent" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Test-TargetResource -UserName "TestUser" -Ensure "Absent" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -183,7 +183,7 @@ InModuleScope $DSCResourceName {
 
             Mock Get-TargetResource -Verifiable { return $userNotExist }
             
-            $result = Test-TargetResource -UserName "TestUser" -Ensure "Absent" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $result = Test-TargetResource -UserName "TestUser" -Ensure "Absent" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -204,7 +204,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return } -ParameterFilter { $arguments -match "CREATE" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -220,7 +220,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return } -ParameterFilter { $arguments -match "CREATE" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should not call all the mocks' {
                 Assert-VerifiableMocks
@@ -237,7 +237,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return } -ParameterFilter { $arguments -match "CREATE" }
             Mock Read-ErrorFile -Verifiable { return }
             
-            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $null = Set-TargetResource -UserName "TestUser" -Ensure "Present" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
@@ -253,7 +253,7 @@ InModuleScope $DSCResourceName {
             Mock Invoke-MySqlCommand -Verifiable { return } -ParameterFilter { $arguments -match "DROP" }
             Mock Read-ErrorFile -Verifiable { return }
 
-            $null = Set-TargetResource -UserName "TestUser" -Ensure "Absent" -UserCredential $testCred -RootCredential $testCred -MySqlVersion "5.6.17"
+            $null = Set-TargetResource -UserName "TestUser" -Ensure "Absent" -UserPassword $testCred -RootPassword $testCred -MySqlVersion "5.6.17"
 
             It 'should call all the mocks' {
                 Assert-VerifiableMocks

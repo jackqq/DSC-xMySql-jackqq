@@ -24,10 +24,10 @@ function Get-TargetResource
         [string] $UserName,
       
         [parameter(Mandatory = $true)]
-        [pscredential] $UserCredential,
+        [pscredential] $UserPassword,
 
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -40,7 +40,7 @@ function Get-TargetResource
     }
 
     $arguments = "--execute=SELECT IF(EXISTS (SELECT USER FROM MYSQL.USER WHERE USER = '$UserName' AND HOST = 'localhost'), 'Yes','No')", "--user=root", `
-        "--password=$($RootCredential.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
+        "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
     $result = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
 
     Read-ErrorFile -ErrorFilePath $ErrorPath
@@ -76,10 +76,10 @@ function Set-TargetResource
         [string] $Ensure = "Present",
         
         [parameter(Mandatory = $true)]
-        [pscredential] $UserCredential,
+        [pscredential] $UserPassword,
 
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -94,8 +94,8 @@ function Set-TargetResource
     if($Ensure -eq "Present")
     {        
         Write-Verbose -Message "Adding user $UserName..."           
-        $arguments = "--execute=CREATE USER '$UserName'@'localhost' IDENTIFIED BY '$($UserCredential.GetNetworkCredential().Password)'", "--user=root", `
-            "--password=$($RootCredential.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
+        $arguments = "--execute=CREATE USER '$UserName'@'localhost' IDENTIFIED BY '$($UserPassword.GetNetworkCredential().Password)'", "--user=root", `
+            "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
         $msg = "$($LocalizedData.UserCreated) -f $UserName"
         Write-Verbose -Message $msg       
@@ -103,7 +103,7 @@ function Set-TargetResource
     else
     {        
         Write-Verbose "Dropping user $UserName..."
-        $arguments = "--execute=DROP USER '$UserName'@'localhost'", "--user=root", "--password=$($RootCredential.GetNetworkCredential().Password)", `
+        $arguments = "--execute=DROP USER '$UserName'@'localhost'", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
             "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
         $msg = "$($LocalizedData.UserRemoved) -f $UserName"
@@ -126,10 +126,10 @@ function Test-TargetResource
         [string] $Ensure = "Present",
        
         [parameter(Mandatory = $true)]
-        [pscredential] $UserCredential,
+        [pscredential] $UserPassword,
 
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -138,7 +138,7 @@ function Test-TargetResource
     
     Write-Verbose "Ensure is $Ensure"
 
-    $status = Get-TargetResource -UserName $UserName -UserCredential $UserCredential -RootCredential $RootCredential -MySqlVersion $MySqlVersion
+    $status = Get-TargetResource -UserName $UserName -UserPassword $UserPassword -RootPassword $RootPassword -MySqlVersion $MySqlVersion
     
     if($status.Ensure -eq $Ensure)
     {

@@ -31,7 +31,7 @@ function Get-TargetResource
         [string] $DatabaseName,
       
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateSet("ALL PRIVILEGES", "CREATE", "DROP", "DELETE", "INSERT", "SELECT", "UPDATE", "EXECUTE")]
@@ -48,7 +48,7 @@ function Get-TargetResource
         Remove-Item -Path $ErrorPath
     }
   
-    $arguments = "--execute=SHOW GRANTS FOR '$UserName'@localhost", "--user=root", "--password=$($RootCredential.GetNetworkCredential().Password)", `
+    $arguments = "--execute=SHOW GRANTS FOR '$UserName'@localhost", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
         "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
     $results = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
     
@@ -92,7 +92,7 @@ function Set-TargetResource
         [string] $Ensure = "Present",  
        
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateSet("ALL PRIVILEGES", "CREATE", "DROP", "DELETE", "INSERT", "SELECT", "UPDATE", "EXECUTE")]
@@ -114,7 +114,7 @@ function Set-TargetResource
         Write-Verbose "Granting $PermissionType on $DatabaseName to $UserName..."
 
         $arguments = "--execute=GRANT $PermissionType ON $DatabaseName.* TO '$UserName'@localhost", "--user=root", `
-            "--password=$($RootCredential.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
+            "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
                    
         $msg = "$($LocalizedData.GrantCreated) -f $UserName"
@@ -124,7 +124,7 @@ function Set-TargetResource
         Write-Verbose "Revoking $PermissionType on $DatabaseName to $UserName..."
 
         $arguments = "--execute=REVOKE $PermissionType ON $DatabaseName.* FOR '$UserName'@localhost", "--user=root", `
-            "--password=$($RootCredential.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
+            "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
 
         $msg = "$($LocalizedData.GrantRemoved) -f $UserName"
@@ -152,7 +152,7 @@ function Test-TargetResource
         [string] $Ensure = "Present",  
        
         [parameter(Mandatory = $true)]
-        [pscredential] $RootCredential,
+        [pscredential] $RootPassword,
 
         [parameter(Mandatory = $true)]
         [ValidateSet("ALL PRIVILEGES", "CREATE", "DROP", "DELETE", "INSERT", "SELECT", "UPDATE", "EXECUTE")]
@@ -166,7 +166,7 @@ function Test-TargetResource
     
     Write-Verbose "Ensure is $Ensure"
 
-    $status = Get-TargetResource -UserName $UserName -DatabaseName $DatabaseName -RootCredential $RootCredential -PermissionType $PermissionType -MySqlVersion $MySqlVersion
+    $status = Get-TargetResource -UserName $UserName -DatabaseName $DatabaseName -RootPassword $RootPassword -PermissionType $PermissionType -MySqlVersion $MySqlVersion
     
     if($status['Ensure'] -eq $Ensure)
     {
