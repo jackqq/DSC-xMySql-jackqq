@@ -23,6 +23,8 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
       
+        [string] $HostName = "localhost",
+
         [parameter(Mandatory = $true)]
         [pscredential] $UserPassword,
 
@@ -39,7 +41,7 @@ function Get-TargetResource
         Remove-Item -Path $ErrorPath
     }
 
-    $arguments = "--execute=SELECT IF(EXISTS (SELECT USER FROM MYSQL.USER WHERE USER = '$UserName' AND HOST = 'localhost'), 'Yes','No')", "--user=root", `
+    $arguments = "--execute=SELECT IF(EXISTS (SELECT USER FROM MYSQL.USER WHERE USER = '$UserName' AND HOST = '$HostName'), 'Yes','No')", "--user=root", `
         "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
     $result = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
 
@@ -47,19 +49,20 @@ function Get-TargetResource
 
     if($result -ieq  "Yes")
     {
-        $msg = $($LocalizedData.UserExists) -f "$UserName"
+        $msg = $($LocalizedData.UserExists) -f "'$UserName'@'$HostName'"
         Write-Verbose -Message $msg          
         $ensureResult = "Present"
     }
     else
     {
-        $msg = $($LocalizedData.UserDoesNotExist) -f "$UserName"
+        $msg = $($LocalizedData.UserDoesNotExist) -f "'$UserName'@'$HostName'"
         Write-Verbose -Message $msg          
         $ensureResult = "Absent"
     }
 
     return @{
         UserName = $UserName
+        HostName = $HostName
         Ensure = $ensureResult
     }
 }
@@ -71,6 +74,8 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
+
+        [string] $HostName = "localhost",
 
         [ValidateSet("Present", "Absent")]
         [string] $Ensure = "Present",
@@ -94,19 +99,19 @@ function Set-TargetResource
     if($Ensure -eq "Present")
     {        
         Write-Verbose -Message "Adding user $UserName..."           
-        $arguments = "--execute=CREATE USER '$UserName'@'localhost' IDENTIFIED BY '$($UserPassword.GetNetworkCredential().Password)'", "--user=root", `
+        $arguments = "--execute=CREATE USER '$UserName'@'$HostName' IDENTIFIED BY '$($UserPassword.GetNetworkCredential().Password)'", "--user=root", `
             "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
-        $msg = $($LocalizedData.UserCreated) -f "$UserName"
+        $msg = $($LocalizedData.UserCreated) -f "'$UserName'@'$HostName'"
         Write-Verbose -Message $msg       
     }
     else
     {        
         Write-Verbose "Dropping user $UserName..."
-        $arguments = "--execute=DROP USER '$UserName'@'localhost'", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
+        $arguments = "--execute=DROP USER '$UserName'@'$HostName'", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
             "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
-        $msg = $($LocalizedData.UserRemoved) -f "$UserName"
+        $msg = $($LocalizedData.UserRemoved) -f "'$UserName'@'$HostName'"
         Write-Verbose -Message $msg  
     }
 
@@ -122,6 +127,8 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
       
+        [string] $HostName = "localhost",
+
         [ValidateSet("Present", "Absent")]
         [string] $Ensure = "Present",
        
@@ -138,7 +145,7 @@ function Test-TargetResource
     
     Write-Verbose "Ensure is $Ensure"
 
-    $status = Get-TargetResource -UserName $UserName -UserPassword $UserPassword -RootPassword $RootPassword -MySqlVersion $MySqlVersion
+    $status = Get-TargetResource -UserName $UserName -HostName $HostName -UserPassword $UserPassword -RootPassword $RootPassword -MySqlVersion $MySqlVersion
     
     if($status.Ensure -eq $Ensure)
     {

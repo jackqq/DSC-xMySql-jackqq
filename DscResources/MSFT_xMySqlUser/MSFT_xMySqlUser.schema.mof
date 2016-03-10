@@ -3,6 +3,7 @@
 class MSFT_xMySqlUser : OMI_BaseResource
 { 
     [Key, Description("Name of MySQL user to create or remove.")] String UserName;
+    [Write, Description("Name or IP of the host from which the user can connect.")] String HostName;
     [Required, Description("Password for MySQL user."), EmbeddedInstance("MSFT_Credential")] String UserPassword;
     [Required, Description("MySQL root password used to create a user."), EmbeddedInstance("MSFT_Credential")] String RootPassword;
     [Write, Description("Ensure MySQL user is present or absent."), ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
