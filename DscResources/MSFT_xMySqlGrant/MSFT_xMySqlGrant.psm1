@@ -26,6 +26,8 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
 
+        [string] $HostName = "localhost",
+
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $DatabaseName,
@@ -48,7 +50,7 @@ function Get-TargetResource
         Remove-Item -Path $ErrorPath
     }
   
-    $arguments = "--execute=SHOW GRANTS FOR '$UserName'@localhost", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
+    $arguments = "--execute=SHOW GRANTS FOR '$UserName'@'$HostName'", "--user=root", "--password=$($RootPassword.GetNetworkCredential().Password)", `
         "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
     $results = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
     
@@ -70,6 +72,7 @@ function Get-TargetResource
 
     return @{
         UserName         = $UserName
+        HostName         = $HostName
         DatabaseName     = $DatabaseName
         Ensure           = $ensureResult
         PermissionType   = $PermissionType
@@ -83,6 +86,8 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
+
+        [string] $HostName = "localhost",
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -113,7 +118,7 @@ function Set-TargetResource
     {        
         Write-Verbose "Granting $PermissionType on $DatabaseName to $UserName..."
 
-        $arguments = "--execute=GRANT $PermissionType ON $DatabaseName.* TO '$UserName'@localhost", "--user=root", `
+        $arguments = "--execute=GRANT $PermissionType ON $DatabaseName.* TO '$UserName'@'$HostName'", "--user=root", `
             "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
                    
@@ -123,7 +128,7 @@ function Set-TargetResource
     {        
         Write-Verbose "Revoking $PermissionType on $DatabaseName to $UserName..."
 
-        $arguments = "--execute=REVOKE $PermissionType ON $DatabaseName.* FOR '$UserName'@localhost", "--user=root", `
+        $arguments = "--execute=REVOKE $PermissionType ON $DatabaseName.* FOR '$UserName'@'$HostName'", "--user=root", `
             "--password=$($RootPassword.GetNetworkCredential().Password)", "--port=$(Get-MySqlPort -MySqlVersion $MySqlVersion)", "--silent"
         $null = Invoke-MySqlCommand -CommandPath $(Get-MySqlExe -MySqlVersion $MySqlVersion) -Arguments $arguments 2>$ErrorPath
 
@@ -143,6 +148,8 @@ function Test-TargetResource
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
         [string] $UserName,
+
+        [string] $HostName = "localhost",
 
         [parameter(Mandatory = $true)]
         [ValidateNotNullOrEmpty()]
@@ -166,7 +173,7 @@ function Test-TargetResource
     
     Write-Verbose "Ensure is $Ensure"
 
-    $status = Get-TargetResource -UserName $UserName -DatabaseName $DatabaseName -RootPassword $RootPassword -PermissionType $PermissionType -MySqlVersion $MySqlVersion
+    $status = Get-TargetResource -UserName $UserName -HostName $HostName -DatabaseName $DatabaseName -RootPassword $RootPassword -PermissionType $PermissionType -MySqlVersion $MySqlVersion
     
     if($status['Ensure'] -eq $Ensure)
     {

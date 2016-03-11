@@ -106,6 +106,9 @@ InModuleScope $DSCResourceName {
             It "UserName should be $userName" {
                 $result['UserName'] | should be $userName
             }
+            It "HostName should be localhost" {
+                $result['HostName'] | should be 'localhost'
+            }
             It "DatabaseName should be $databaseName" {
                 $result['DatabaseName'] | should be $databaseName
             }
@@ -136,6 +139,9 @@ InModuleScope $DSCResourceName {
             }
             It "UserName should be $userName" {
                 $result['UserName'] | should be $userName
+            }
+            It "HostName should be localhost" {
+                $result['HostName'] | should be 'localhost'
             }
             It "DatabaseName should be $databaseName" {
                 $result['DatabaseName'] | should be $databaseName
@@ -168,6 +174,9 @@ InModuleScope $DSCResourceName {
             It "UserName should be $userName" {
                 $result['UserName'] | should be $userName
             }
+            It "HostName should be localhost" {
+                $result['HostName'] | should be 'localhost'
+            }
             It "DatabaseName should be $databaseName" {
                 $result['DatabaseName'] | should be $databaseName
             }
@@ -176,6 +185,27 @@ InModuleScope $DSCResourceName {
             }
             It 'PermissionType should be $permissionType' {
                 $result['PermissionType'] | should be $permissionType
+            }
+        }
+
+        Context 'when given a remote user' {
+            $testUserName = $userName
+            $testHostName = "%"
+            $testDatabaseName = $databaseName
+
+            Mock Test-Path { return $true }
+            Mock Remove-Item {}
+            Mock Get-MySqlPort { return "3306" }
+            Mock Get-MySqlExe { return "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" }
+            Mock Invoke-MySqlCommand { return "Yes" }
+            Mock Read-ErrorFile {}
+
+            $result = Get-TargetResource -UserName $testUserName -HostName $testHostName -DatabaseName $testDatabaseName -RootPassword $testCred -PermissionType "CREATE" -MySqlVersion "5.6.17"
+
+            It "should call Invoke-MySqlCommand with his/her UserName and HostName" {
+                Assert-MockCalled Invoke-MySqlCommand -ParameterFilter {
+                    ($Arguments -match "'$testUserName'@'$testHostName'")
+                }
             }
         }
     }
@@ -264,6 +294,23 @@ InModuleScope $DSCResourceName {
         }
     }
 
+    Describe "Test-TargetResource" {
+        Context "given a remote user" {
+            $testUserName = "TestUser"
+            $testHostName = "%"
+
+            Mock Get-TargetResource { return @{ Ensure = $testEnsure; UserName = $testUserName } }
+
+            $result = Test-TargetResource -UserName $testUserName -HostName $testHostName -DatabaseName "TestDB" -Ensure "Absent" -RootPassword $testCred -PermissionType "CREATE" -MySqlVersion "5.6.17"
+
+            It "should call Get-TargetResource with his/her UserName and HostName" {
+                Assert-MockCalled Get-TargetResource -ParameterFilter {
+                    ($UserName -eq "$testUserName") -and ($HostName -eq "$testHostName")
+                }
+            }
+        }
+    }
+
     Describe 'how Set-TargetResource works' {
         Context "when ErrorPath exists" {
 
@@ -331,6 +378,28 @@ InModuleScope $DSCResourceName {
             It 'should call all the mocks' {
                 Assert-VerifiableMocks
                 Assert-MockCalled Invoke-MySqlCommand -Exactly 1
+            }
+        }
+
+        Context 'when given a remote user' {
+            $testUserName = "TestUser"
+            $testHostName = "%"
+            $testDatabaseName = "TestDB"
+
+            Mock Test-Path { return $true }
+            Mock Remove-Item {}
+            Mock Get-MySqlPort { return "3306" }
+            Mock Get-MySqlExe { return "C:\Program Files\MySQL\MySQL Server 5.6\bin\mysql.exe" }
+            Mock Invoke-MySqlCommand { return "Yes" }
+            Mock Read-ErrorFile {}
+
+            Set-TargetResource -UserName $testUserName -HostName $testHostName -DatabaseName $testDatabaseName -Ensure "Present" -RootPassword $testCred -PermissionType "CREATE" -MySqlVersion "5.6.17"
+            Set-TargetResource -UserName $testUserName -HostName $testHostName -DatabaseName $testDatabaseName -Ensure "Absent" -RootPassword $testCred -PermissionType "CREATE" -MySqlVersion "5.6.17"
+
+            It "should call Invoke-MySqlCommand with his/her UserName and HostName" {
+                Assert-MockCalled Invoke-MySqlCommand -Times 2 -ParameterFilter {
+                    ($Arguments -match "'$testUserName'@'$testHostName'")
+                }
             }
         }
     }
